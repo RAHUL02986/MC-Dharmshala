@@ -1,14 +1,27 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "@/screens/HomeScreen";
-import DetailScreen from "@/screens/DetailScreen";
+
+import DashboardScreen from "@/screens/DashboardScreen";
+import PaymentFormScreen from "@/screens/PaymentFormScreen";
+import PaymentConfirmScreen from "@/screens/PaymentConfirmScreen";
+import ReceiptScreen from "@/screens/ReceiptScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
+import { Payment } from "@/utils/storage";
 
 export type HomeStackParamList = {
-  Home: undefined;
-  Detail: undefined;
+  Dashboard: undefined;
+  PaymentForm: undefined;
+  PaymentConfirm: {
+    type: string;
+    amount: number;
+    period: string;
+    notes: string;
+  };
+  Receipt: {
+    paymentId: string;
+  };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -23,16 +36,36 @@ export default function HomeStackNavigator() {
       }}
     >
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Dashboard"
+        component={DashboardScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="My App" />,
+          headerTitle: () => <HeaderTitle title="Dharamshala MC" />,
         }}
       />
       <Stack.Screen
-        name="Detail"
-        component={DetailScreen}
-        options={{ headerTitle: "Detail" }}
+        name="PaymentForm"
+        component={PaymentFormScreen}
+        options={{
+          title: "Pay Rent",
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+        }}
+      />
+      <Stack.Screen
+        name="PaymentConfirm"
+        component={PaymentConfirmScreen}
+        options={{
+          title: "Confirm Payment",
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+        }}
+      />
+      <Stack.Screen
+        name="Receipt"
+        component={ReceiptScreen}
+        options={{
+          title: "Receipt",
+          headerBackVisible: false,
+          ...getCommonScreenOptions({ theme, isDark, transparent: false }),
+        }}
       />
     </Stack.Navigator>
   );
