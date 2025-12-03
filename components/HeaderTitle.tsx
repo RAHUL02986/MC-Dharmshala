@@ -1,8 +1,7 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { Image, View, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
@@ -16,10 +15,12 @@ export function HeaderTitle({ title }: HeaderTitleProps) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: primaryColor }]}>
-        <Feather name="home" size={16} color="#FFFFFF" />
+      <View style={[styles.iconContainer]}>
+        <Image
+          source={require('@/assets/images/logo.png')} // path to your logo
+          style={{ width: 88, height: 88, resizeMode: 'contain' }}
+        />
       </View>
-      <ThemedText style={styles.title}>{title}</ThemedText>
     </View>
   );
 }
@@ -31,13 +32,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   iconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: BorderRadius.xs,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.sm,
-  },
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
   title: {
     fontSize: 17,
     fontWeight: "600",
