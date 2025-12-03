@@ -53,5 +53,10 @@
     "prettier": "3.6.2",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
