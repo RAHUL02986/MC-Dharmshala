@@ -26,7 +26,7 @@ type LoginScreenProps = {
 
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { theme, isDark } = useTheme();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, forgotPassword } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -145,7 +145,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
         <Spacer height={Spacing.md} />
 
-        <Pressable style={styles.forgotPassword}>
+        <Pressable style={styles.forgotPassword} onPress={() => forgotPassword(email)}>
           <ThemedText type="small" style={{ color: primaryColor }}>
             Forgot Password?
           </ThemedText>
@@ -179,7 +179,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
       <View style={styles.footer}>
         <ThemedText
-          type="caption"
+          type="small"
           style={[styles.footerText, { color: theme.textSecondary }]}
         >
           By continuing, you agree to our Terms of Service and Privacy Policy

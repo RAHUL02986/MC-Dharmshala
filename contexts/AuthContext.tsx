@@ -5,6 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { Alert } from "react-native";
 import { storage, User, generateId } from "@/utils/storage";
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   register: (userData: Omit<User, "id" | "createdAt">) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  forgotPassword: (email: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -109,6 +111,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const forgotPassword = (email: string): void => {
+    Alert.alert(
+      "Forgot Password",
+      "Since this is a local app without email capabilities, please contact support at support@mcdharamshala.gov.in to reset your password.",
+      [{ text: "OK" }]
+    );
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -119,6 +129,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         register,
         logout,
         updateUser,
+        forgotPassword,
       }}
     >
       {children}
