@@ -30,12 +30,17 @@ type PaymentFormScreenProps = {
 
 type PaymentType = Payment["type"];
 
-const PAYMENT_TYPES: { type: PaymentType; label: string; icon: keyof typeof Feather.glyphMap }[] = [
-  { type: "house_rent", label: "House Rent", icon: "home" },
-  { type: "property_tax", label: "Property Tax", icon: "file-text" },
-  { type: "water_charges", label: "Water Charges", icon: "droplet" },
-  { type: "sewage_tax", label: "Sewage Tax", icon: "git-merge" },
-  { type: "other", label: "Other", icon: "more-horizontal" },
+const PAYMENT_TYPES: {
+  type: PaymentType;
+  label: string;
+  icon: keyof typeof Feather.glyphMap;
+  color: string; // new property
+}[] = [
+  { type: "house_rent", label: "House Rent", icon: "home", color: "#FFD700" },
+  { type: "property_tax", label: "Property Tax", icon: "file-text", color: "#FF6347" },
+  { type: "water_charges", label: "Water Charges", icon: "droplet", color: "#1E90FF" },
+  { type: "sewage_tax", label: "Sewage Tax", icon: "git-merge", color: "#32CD32" },
+  { type: "other", label: "Other", icon: "more-horizontal", color: "#FF69B4" },
 ];
 
 const PERIODS = [
@@ -122,11 +127,9 @@ export default function PaymentFormScreen({ navigation }: PaymentFormScreenProps
               style={[
                 styles.paymentTypeCard,
                 {
-                  backgroundColor: isSelected
-                    ? Colors.light.primaryLight
-                    : theme.backgroundDefault,
-                  borderColor: isSelected ? primaryColor : theme.border,
-                  borderWidth: isSelected ? 2 : 1,
+                  backgroundColor: isSelected ? theme.backgroundDefault : item.color,
+                  borderColor: isSelected ? item.color :theme.backgroundDefault ,
+                  borderWidth: isSelected ? 1 : 1,
                 },
               ]}
               onPress={() => setSelectedType(item.type)}
@@ -134,13 +137,13 @@ export default function PaymentFormScreen({ navigation }: PaymentFormScreenProps
               <Feather
                 name={item.icon}
                 size={24}
-                color={isSelected ? primaryColor : theme.textSecondary}
+                color={isSelected ? item.color :theme.text }
               />
               <ThemedText
                 type="small"
                 style={[
                   styles.paymentTypeLabel,
-                  { color: isSelected ? primaryColor : theme.text },
+                  { color: isSelected ? item.color : theme.text },
                 ]}
               >
                 {item.label}

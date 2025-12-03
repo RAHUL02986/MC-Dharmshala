@@ -1,4 +1,0 @@
-- [x] Add forgotPassword method to AuthContext.tsx that displays an alert with support instructions
-- [x] Update LoginScreen.tsx to add onPress handler to the "Forgot Password?" Pressable
-- [x] Fix ReceiptScreen.tsx PDF generation error by removing RNHTMLtoPDF dependency
-- [x] Fix LoginScreen.tsx duplicate forgotPassword identifier error

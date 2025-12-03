@@ -203,9 +203,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           ))}
         </View>
       )}
-
       <Spacer height={Spacing["2xl"]} />
-
       <View
         style={[
           styles.announcementCard,
@@ -228,12 +226,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           Pay your property tax before March 31st to avail 10% rebate on the total amount.
         </ThemedText>
       </View>
-
       <Spacer height={Spacing.xl} />
     </ScreenScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   propertyCard: {
     padding: Spacing.xl,
