@@ -7,7 +7,10 @@ import {
   Alert,
   Linking,
   Platform,
+  Image,
+  ActionSheetIOS,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -15,11 +18,8 @@ import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Spacing,
-  BorderRadius,
-  Colors,
-} from "@/constants/theme";
+
+import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import Spacer from "@/components/Spacer";
 import type { ProfileStackParamList } from "@/navigation/ProfileStackNavigator";
 
@@ -29,7 +29,7 @@ type SettingsScreenProps = {
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { theme, isDark } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
   const [paymentReminders, setPaymentReminders] = useState(true);
   const [announcements, setAnnouncements] = useState(true);
@@ -37,21 +37,79 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const primaryColor = isDark ? Colors.dark.primary : Colors.light.primary;
   const errorColor = isDark ? Colors.dark.error : Colors.light.error;
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        { text: "Cancel", style: "cancel" },
+  // ---------------------------------------------------
+  // 📌 PICK IMAGE (GALLERY OR CAMERA)
+  // ---------------------------------------------------
+
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Camera access required.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      updateUser({ profileImage: result.assets[0].uri });
+    }
+  };
+
+  const openGallery = async () => {
+    const { status } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Gallery access required.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      updateUser({ profileImage: result.assets[0].uri });
+    }
+  };
+
+  const chooseImageSource = () => {
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
         {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-          },
+          options: ["Cancel", "Take Photo", "Choose from Gallery"],
+          cancelButtonIndex: 0,
         },
-      ]
-    );
+        (buttonIndex) => {
+          if (buttonIndex === 1) openCamera();
+          else if (buttonIndex === 2) openGallery();
+        }
+      );
+    } else {
+      Alert.alert("Select Option", "", [
+        { text: "Camera", onPress: openCamera },
+        { text: "Gallery", onPress: openGallery },
+        { text: "Cancel", style: "cancel" },
+      ]);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+        },
+      },
+    ]);
   };
 
   const handleContact = () => {
@@ -73,7 +131,10 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     <Pressable
       style={({ pressed }) => [
         styles.menuItem,
-        { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.8 : 1 },
+        {
+          backgroundColor: theme.backgroundDefault,
+          opacity: pressed ? 0.8 : 1,
+        },
       ]}
       onPress={onPress}
       disabled={!onPress && !rightElement}
@@ -94,6 +155,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           color={isDestructive ? errorColor : primaryColor}
         />
       </View>
+
       <View style={styles.menuContent}>
         <ThemedText
           type="body"
@@ -110,20 +172,42 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           </ThemedText>
         ) : null}
       </View>
+
       {rightElement ? (
         rightElement
       ) : onPress ? (
-        <Feather name="chevron-right" size={20} color={theme.textSecondary} />
+        <Feather
+          name="chevron-right"
+          size={20}
+          color={theme.textSecondary}
+        />
       ) : null}
     </Pressable>
   );
 
   return (
     <ScreenScrollView>
+      {/* ---------------- PROFILE SECTION ---------------- */}
       <View style={styles.profileSection}>
-        <View style={[styles.avatar, { backgroundColor: primaryColor }]}>
-          <Feather name="user" size={40} color="#FFFFFF" />
-        </View>
+        {/* PROFILE IMAGE + ADD ICON */}
+        <Pressable onPress={chooseImageSource}>
+          <View style={[styles.avatar, { backgroundColor: primaryColor }]}>
+            {user?.profileImage ? (
+              <Image
+                source={{ uri: user.profileImage }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <Feather name="user" size={40} color="#FFFFFF" />
+            )}
+
+            {/* PLUS ICON OVERLAY */}
+            <View style={styles.plusIconContainer}>
+              <Feather name="plus" size={18} color="#fff" />
+            </View>
+          </View>
+        </Pressable>
+
         <Spacer height={Spacing.lg} />
         <ThemedText type="h3">{user?.fullName}</ThemedText>
         <ThemedText
@@ -142,6 +226,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       <Spacer height={Spacing["2xl"]} />
 
+      {/* PROPERTY DETAILS */}
       <ThemedText
         type="small"
         style={[styles.sectionTitle, { color: theme.textSecondary }]}
@@ -162,6 +247,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       <Spacer height={Spacing["2xl"]} />
 
+      {/* NOTIFICATIONS */}
       <ThemedText
         type="small"
         style={[styles.sectionTitle, { color: theme.textSecondary }]}
@@ -184,7 +270,9 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             thumbColor="#FFFFFF"
           />
         )}
+
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
+
         {renderMenuItem(
           "volume-2",
           "Municipal Announcements",
@@ -201,6 +289,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
       <Spacer height={Spacing["2xl"]} />
 
+      {/* SUPPORT */}
       <ThemedText
         type="small"
         style={[styles.sectionTitle, { color: theme.textSecondary }]}
@@ -217,17 +306,15 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           "+91 1892 224000",
           handleContact
         )}
+
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        {renderMenuItem(
-          "help-circle",
-          "Help & FAQ",
-          undefined,
-          () => {}
-        )}
+
+        {renderMenuItem("help-circle", "Help & FAQ", undefined, () => {})}
       </View>
 
       <Spacer height={Spacing["2xl"]} />
 
+      {/* ABOUT */}
       <ThemedText
         type="small"
         style={[styles.sectionTitle, { color: theme.textSecondary }]}
@@ -238,30 +325,24 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Spacer height={Spacing.md} />
 
       <View style={styles.menuGroup}>
-        {renderMenuItem(
-          "info",
-          "About",
-          "Version 1.0.0",
-          () => {}
-        )}
+        {renderMenuItem("info", "About", "Version 1.0.0", () => {})}
+
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        {renderMenuItem(
-          "file-text",
-          "Terms of Service",
-          undefined,
-          () => {}
+
+        {renderMenuItem("file-text", "Terms of Service", undefined, () =>
+          navigation.navigate("TermsAndConditions")
         )}
+
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
-        {renderMenuItem(
-          "shield",
-          "Privacy Policy",
-          undefined,
-          () => {}
+
+        {renderMenuItem("shield", "Privacy Policy", undefined, () =>
+          navigation.navigate("PrivacyPolicy")
         )}
       </View>
 
       <Spacer height={Spacing["2xl"]} />
 
+      {/* LOGOUT */}
       <View style={styles.menuGroup}>
         {renderMenuItem(
           "log-out",
@@ -274,24 +355,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       </View>
 
       <Spacer height={Spacing["3xl"]} />
-
-      <View style={styles.footer}>
-        <Feather name="home" size={24} color={theme.textSecondary} />
-        <ThemedText
-          type="small"
-          style={[styles.footerText, { color: theme.textSecondary }]}
-        >
-          Municipal Corporation of Dharamshala
-        </ThemedText>
-        <ThemedText
-          type="caption"
-          style={{ color: theme.textSecondary }}
-        >
-          Making Dharamshala Digital
-        </ThemedText>
-      </View>
-
-      <Spacer height={Spacing.xl} />
     </ScreenScrollView>
   );
 }
@@ -307,7 +370,31 @@ const styles = StyleSheet.create({
     borderRadius: 44,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
+  profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 44,
+  },
+
+  // 📌 Added: PLUS ICON
+plusIconContainer: {
+  position: "absolute",
+  bottom: 0,
+  right: 0,
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: Colors.light.primary,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth: 2,
+  borderColor: "#fff",
+  zIndex: 10,
+},
+
+
   sectionTitle: {
     fontWeight: "600",
     letterSpacing: 1,
@@ -335,14 +422,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginLeft: 72,
-  },
-  footer: {
-    alignItems: "center",
-    paddingVertical: Spacing.xl,
-  },
-  footerText: {
-    marginTop: Spacing.sm,
-    fontWeight: "500",
+    marginLeft: 2,
   },
 });

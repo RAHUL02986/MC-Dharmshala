@@ -14,6 +14,9 @@ export interface User {
   propertyId: string;
   address: string;
   createdAt: string;
+
+  // ✅ NEW FIELD — FIXES YOUR ERROR
+  profileImage?: string;
 }
 
 export interface Payment {

@@ -146,18 +146,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
       <Button onPress={handleSubmit}>Submit Form</Button>
 
-      <Spacer height={Spacing["2xl"]} />
 
-      <ThemedText type="h3" style={styles.sectionTitle}>
-        Testing
-      </ThemedText>
-      <Spacer height={Spacing.md} />
-      <Button
-        onPress={() => navigation.navigate("Crash")}
-        style={styles.crashButton}
-      >
-        Crash App
-      </Button>
     </ScreenKeyboardAwareScrollView>
   );
 }
